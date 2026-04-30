@@ -744,8 +744,8 @@ body {
       <div class="page-sub">SENTINEL ran at 08:00 · 3 briefs generated · 0 errors · Tuesday 29 April 2026</div>
     </div>
     <div class="header-actions">
-      <button class="btn btn-ghost">Export report</button>
-      <button class="btn btn-primary">View Notion ↗</button>
+      <button class="btn btn-ghost" onclick="showPhase2('Export Report')">Export report</button>
+      <button class="btn btn-primary" onclick="showPhase2('View Notion')">View Notion ↗</button>
     </div>
   </div>
 
@@ -1251,6 +1251,38 @@ function updateTime() {
 }
 updateTime();
 setInterval(updateTime, 1000);
+
+// Phase 2 toast notification
+function showPhase2(feature) {
+  const existing = document.getElementById('phase2-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'phase2-toast';
+  toast.style.cssText = [
+    'position:fixed',
+    'bottom:2rem',
+    'right:2rem',
+    'background:#1a1a16',
+    'border:1px solid #2e2e28',
+    'border-left:2px solid #d4a83c',
+    'border-radius:8px',
+    'padding:1rem 1.25rem',
+    'z-index:9999',
+    'max-width:300px',
+    'box-shadow:0 8px 32px rgba(0,0,0,.35)',
+    'animation:fadeUp .3s ease forwards'
+  ].join(';');
+  toast.innerHTML =
+    '<div style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#d4a83c;margin-bottom:6px">Phase 2 feature</div>' +
+    '<div style="font-family:\'Geist\',sans-serif;font-size:13px;font-weight:500;color:#f4f1ea;margin-bottom:5px">' + feature + '</div>' +
+    '<div style="font-family:\'Geist\',sans-serif;font-size:12px;color:rgba(244,241,234,.45);line-height:1.55">This feature is under active development and will be available in Phase 2 — with live Supabase and Notion data integration.</div>';
+  document.body.appendChild(toast);
+  setTimeout(function() {
+    toast.style.transition = 'opacity .3s ease';
+    toast.style.opacity = '0';
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 4000);
+}
 
 // Sidebar active state on scroll
 const sections = document.querySelectorAll('[id]');
