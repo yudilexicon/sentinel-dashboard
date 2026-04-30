@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL — Client Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────── */
+:root {
+  --ink: #0c0c0a;
+  --ink2: #1a1a16;
+  --ink3: #252520;
+  --ink4: #2e2e28;
+  --paper: #f4f1ea;
+  --paper2: #ece8df;
+  --paper3: #e2ddd2;
+  --paper4: #d4cfc2;
+  --gold: #b8922a;
+  --gold2: #d4a83c;
+  --gold3: #e8c06a;
+  --gold-bg: rgba(184,146,42,0.08);
+  --gold-border: rgba(184,146,42,0.2);
+  --green: #2a6b47;
+  --green2: #3d9b65;
+  --green3: #5ab882;
+  --green-bg: rgba(42,107,71,0.08);
+  --green-border: rgba(42,107,71,0.2);
+  --red: #9b2a2a;
+  --red2: #c94444;
+  --red-bg: rgba(155,42,42,0.08);
+  --red-border: rgba(155,42,42,0.2);
+  --blue: #2a4a8c;
+  --blue2: #4472c4;
+  --blue-bg: rgba(42,74,140,0.08);
+  --blue-border: rgba(42,74,140,0.2);
+  --amber: #8c5a2a;
+  --amber-bg: rgba(140,90,42,0.08);
+  --amber-border: rgba(140,90,42,0.2);
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'Geist Mono', 'IBM Plex Mono', monospace;
+  --sans: 'Geist', system-ui, sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+/* ── RESET ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; scroll-behavior: smooth; }
+
+/* ── BODY ───────────────────────────────── */
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── TOP NAV ────────────────────────────── */
+.topnav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 200;
+  border-bottom: 1px solid var(--ink3);
+}
+.nav-left { display: flex; align-items: center; gap: 1.5rem; }
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gold3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.nav-client {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: rgba(244,241,234,.35);
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--ink3);
+}
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--green3);
+  letter-spacing: .08em;
+}
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green3);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.nav-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(244,241,234,.25);
+}
+
+/* ── SIDEBAR ────────────────────────────── */
+.layout { display: flex; padding-top: 56px; min-height: 100vh; }
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--ink2);
+  border-right: 1px solid var(--ink3);
+  position: fixed;
+  top: 56px; left: 0; bottom: 0;
+  overflow-y: auto;
+  padding: 1.5rem 0;
+}
+.sidebar-section {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(244,241,234,.2);
+  padding: .5rem 1.25rem;
+  margin-top: 1rem;
+}
+.sidebar-section:first-child { margin-top: 0; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: .625rem 1.25rem;
+  cursor: pointer;
+  transition: background .12s;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover { background: rgba(244,241,234,.04); }
+.nav-item.active {
+  background: var(--gold-bg);
+  border-left-color: var(--gold2);
+}
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  opacity: .4;
+  flex-shrink: 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-label {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: rgba(244,241,234,.4);
+}
+.nav-item.active .nav-label { color: var(--gold3); }
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  color: var(--red2);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* ── MAIN ───────────────────────────────── */
+.main {
+  flex: 1;
+  margin-left: 220px;
+  padding: 2rem;
+  max-width: 1100px;
+}
+
+/* ── PAGE HEADER ────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--paper3);
+}
+.page-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-style: italic;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+.page-sub {
+  font-size: 13px;
+  color: rgba(12,12,10,.4);
+  font-family: var(--mono);
+}
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: .5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid;
+  transition: all .12s;
+  letter-spacing: .04em;
+}
+.btn-ghost {
+  background: transparent;
+  border-color: var(--paper3);
+  color: rgba(12,12,10,.5);
+}
+.btn-ghost:hover { border-color: var(--paper4); color: var(--ink); }
+.btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.btn-primary:hover { background: var(--ink2); }
+
+/* ── METRIC ROW ─────────────────────────── */
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 1.75rem;
+}
+.metric-card {
+  background: var(--paper);
+  border: 1px solid var(--paper3);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.metric-card:hover { border-color: var(--paper4); }
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.mc-gold::before { background: var(--gold2); }
+.mc-green::before { background: var(--green2); }
+.mc-red::before { background: var(--red2); }
+.mc-blue::before { background: var(--blue2); }
+.mc-amber::before { background: #c47a2a; }
+.metric-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(12,12,10,.35);
+  margin-bottom: .5rem;
+}
+.metric-value {
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.metric-change {
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mc-up { color: var(--green2); }
+.mc-down { color: var(--red2); }
+.mc-flat { color: rgba(12,12,10,.3); }
+.metric-target {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(12,12,10,.25);
+  margin-top: 2px;
+}
+
+/* ── PROGRESS BAR ───────────────────────── */
+.progress-wrap { margin-top: .625rem; }
+.progress-track {
+  height: 3px;
+  background: var(--paper3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+.pf-gold { background: var(--gold2); }
+.pf-green { background: var(--green2); }
+.pf-red { background: var(--red2); }
+.pf-blue { background: var(--blue2); }
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: rgba(12,12,10,.3);
+  margin-top: 4px;
+}
+
+/* ── TWO COL GRID ───────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+.three-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+@media(max-width: 780px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+/* ── CARD ───────────────────────────────── */
+.card {
+  background: var(--paper);
+  border: 1px solid var(--paper3);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--paper3);
+  background: var(--paper2);
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(12,12,10,.5);
+}
+.card-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.cb-gold { background: var(--gold-bg); color: var(--gold2); border: 1px solid var(--gold-border); }
+.cb-green { background: var(--green-bg); color: var(--green2); border: 1px solid var(--green-border); }
+.cb-red { background: var(--red-bg); color: var(--red2); border: 1px solid var(--red-border); }
+.cb-blue { background: var(--blue-bg); color: var(--blue2); border: 1px solid var(--blue-border); }
+.card-body { padding: 1.25rem; }
+
+/* ── BRIEF LIST ─────────────────────────── */
+.brief-item {
+  padding: .875rem 0;
+  border-bottom: 1px solid var(--paper3);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+.brief-item:last-child { border-bottom: none; }
+.brief-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(12,12,10,.25);
+  padding-top: 2px;
+  width: 20px;
+}
+.brief-content { flex: 1; }
+.brief-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.brief-hook {
+  font-size: 12px;
+  color: rgba(12,12,10,.5);
+  font-style: italic;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.brief-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.brief-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.bt-platform { background: var(--blue-bg); color: var(--blue2); border: 1px solid var(--blue-border); }
+.bt-pillar { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
+.bt-status-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.bt-status-approved { background: var(--green-bg); color: var(--green2); border: 1px solid var(--green-border); }
+.brief-score {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  text-align: right;
+  padding-top: 2px;
+}
+.score-high { color: var(--green2); }
+.score-mid { color: var(--gold2); }
+.score-low { color: var(--red2); }
+
+/* ── SCORECARD TABLE ────────────────────── */
+.scorecard-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: .75rem 0;
+  border-bottom: 1px solid var(--paper3);
+  font-size: 13px;
+}
+.scorecard-row:last-child { border-bottom: none; }
+.sc-label { color: var(--ink); }
+.sc-target {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(12,12,10,.35);
+  text-align: right;
+  white-space: nowrap;
+}
+.sc-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+  min-width: 70px;
+}
+.sc-status {
+  width: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* ── ROCK LIST ──────────────────────────── */
+.rock-item {
+  padding: .875rem 0;
+  border-bottom: 1px solid var(--paper3);
+}
+.rock-item:last-child { border-bottom: none; }
+.rock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rock-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  flex: 1;
+}
+.rock-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-left: 10px;
+}
+.rs-on { background: var(--green-bg); color: var(--green2); border: 1px solid var(--green-border); }
+.rs-risk { background: var(--red-bg); color: var(--red2); border: 1px solid var(--red-border); }
+.rs-progress { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.rock-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(12,12,10,.35);
+  margin-bottom: 6px;
+}
+
+/* ── AGENT HEALTH ───────────────────────── */
+.agent-health {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.agent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: .625rem .875rem;
+  background: var(--paper2);
+  border: 1px solid var(--paper3);
+  border-radius: var(--radius-sm);
+}
+.agent-letter {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1;
+  width: 20px;
+  flex-shrink: 0;
+}
+.al-gold { color: var(--gold2); }
+.al-blue { color: var(--blue2); }
+.al-green { color: var(--green2); }
+.al-red { color: var(--red2); }
+.agent-info { flex: 1; }
+.agent-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 1px;
+}
+.agent-last {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(12,12,10,.35);
+}
+.agent-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.asd-live { background: var(--green3); animation: pulse 2s infinite; }
+.asd-idle { background: var(--paper4); }
+.asd-build { background: var(--gold3); }
+
+/* ── ACTIVITY FEED ──────────────────────── */
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: .75rem 0;
+  border-bottom: .5px solid var(--paper3);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ai-gold { background: var(--gold-bg); }
+.ai-green { background: var(--green-bg); }
+.ai-blue { background: var(--blue-bg); }
+.ai-red { background: var(--red-bg); }
+.activity-body { flex: 1; }
+.activity-text {
+  font-size: 12.5px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 2px;
+}
+.activity-time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(12,12,10,.3);
+}
+
+/* ── MEMORY TABLE ───────────────────────── */
+.memory-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  padding: .75rem 0;
+  border-bottom: .5px solid var(--paper3);
+  align-items: center;
+  font-size: 12.5px;
+}
+.memory-row:last-child { border-bottom: none; }
+.mr-title { color: var(--ink); font-weight: 500; }
+.mr-pillar {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(12,12,10,.4);
+  white-space: nowrap;
+}
+.mr-score {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
+}
+.mr-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ── LOCK ALERT ─────────────────────────── */
+.lock-alert {
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  border-radius: var(--radius-sm);
+  padding: .875rem 1rem;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.lock-alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.lock-alert-body { flex: 1; }
+.lock-alert-title { font-size: 13px; font-weight: 500; color: var(--red2); margin-bottom: 2px; }
+.lock-alert-desc { font-size: 12px; color: rgba(155,42,42,.7); line-height: 1.5; }
+.lock-ok {
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-sm);
+  padding: .875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--green2);
+}
+
+/* ── SECTION DIVIDER ────────────────────── */
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(12,12,10,.3);
+  margin-bottom: .875rem;
+  margin-top: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: .5px;
+  background: var(--paper3);
+}
+
+/* ── FOOTER ─────────────────────────────── */
+.dashboard-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--paper3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: rgba(12,12,10,.25);
+}
+
+/* ── ANIMATIONS ─────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp .4s ease forwards; }
+.delay-1 { animation-delay: .05s; opacity: 0; }
+.delay-2 { animation-delay: .1s; opacity: 0; }
+.delay-3 { animation-delay: .15s; opacity: 0; }
+.delay-4 { animation-delay: .2s; opacity: 0; }
+.delay-5 { animation-delay: .25s; opacity: 0; }
+</style>
+</head>
+<body>
+
+<!-- ── TOP NAV ─────────────────────────── -->
+<nav class="topnav">
+  <div class="nav-left">
+    <div class="nav-logo">SENTINEL</div>
+    <div class="nav-client">Alex Chen · Scalepath Advisory</div>
+  </div>
+  <div class="nav-right">
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      System active
+    </div>
+    <div class="nav-time" id="navTime">—</div>
+  </div>
+</nav>
+
+<div class="layout">
+
+<!-- ── SIDEBAR ────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item active" href="#overview">
+    <div class="nav-icon">◈</div>
+    <div class="nav-label">Dashboard</div>
+  </a>
+  <a class="nav-item" href="#content">
+    <div class="nav-icon">✦</div>
+    <div class="nav-label">Content Queue</div>
+  </a>
+  <a class="nav-item" href="#rocks">
+    <div class="nav-icon">◎</div>
+    <div class="nav-label">Rocks (Q2 2026)</div>
+  </a>
+
+  <div class="sidebar-section">Intelligence</div>
+  <a class="nav-item" href="#scorecard">
+    <div class="nav-icon">▤</div>
+    <div class="nav-label">Scorecard</div>
+  </a>
+  <a class="nav-item" href="#memory">
+    <div class="nav-icon">◉</div>
+    <div class="nav-label">Memory</div>
+  </a>
+
+  <div class="sidebar-section">System</div>
+  <a class="nav-item" href="#agents">
+    <div class="nav-icon">⬡</div>
+    <div class="nav-label">Agent Health</div>
+  </a>
+  <a class="nav-item" href="#lock">
+    <div class="nav-icon">⊠</div>
+    <div class="nav-label">LOCK · Retention</div>
+    <div class="nav-badge">2</div>
+  </a>
+  <a class="nav-item" href="#activity">
+    <div class="nav-icon">≡</div>
+    <div class="nav-label">Audit Log</div>
+  </a>
+</aside>
+
+<!-- ── MAIN ───────────────────────────── -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header fade-up">
+    <div>
+      <div class="page-title">Good morning, Alex.</div>
+      <div class="page-sub">SENTINEL ran at 08:00 · 3 briefs generated · 0 errors · Tuesday 29 April 2026</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost">Export report</button>
+      <button class="btn btn-primary">View Notion ↗</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION: OVERVIEW ─────────────── -->
+  <div id="overview">
+    <div class="metric-row">
+      <div class="metric-card mc-gold fade-up delay-1">
+        <div class="metric-label">MRR</div>
+        <div class="metric-value">$47K</div>
+        <div class="metric-change mc-up">↑ $2,400 this month</div>
+        <div class="metric-target">Target: $100K by Dec 2026</div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill pf-gold" style="width:47%"></div></div>
+          <div class="progress-label"><span>$0</span><span>47%</span><span>$100K</span></div>
+        </div>
+      </div>
+      <div class="metric-card mc-green fade-up delay-2">
+        <div class="metric-label">LinkedIn Followers</div>
+        <div class="metric-value">8,421</div>
+        <div class="metric-change mc-up">↑ 214 this week</div>
+        <div class="metric-target">Target: 14,000 by June 30</div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill pf-green" style="width:60%"></div></div>
+          <div class="progress-label"><span>8,400</span><span>60%</span><span>14,000</span></div>
+        </div>
+      </div>
+      <div class="metric-card mc-blue fade-up delay-3">
+        <div class="metric-label">Newsletter Subscribers</div>
+        <div class="metric-value">1,284</div>
+        <div class="metric-change mc-up">↑ 44 this week</div>
+        <div class="metric-target">Target: 2,500 by June 30</div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill pf-blue" style="width:51%"></div></div>
+          <div class="progress-label"><span>1,240</span><span>51%</span><span>2,500</span></div>
+        </div>
+      </div>
+      <div class="metric-card mc-green fade-up delay-4">
+        <div class="metric-label">Calls Booked (ECHO)</div>
+        <div class="metric-value">7</div>
+        <div class="metric-change mc-up">↑ 3 vs last week</div>
+        <div class="metric-target">Target: 15–25/month</div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill pf-green" style="width:35%"></div></div>
+          <div class="progress-label"><span>0</span><span>7 this mo.</span><span>15</span></div>
+        </div>
+      </div>
+      <div class="metric-card mc-amber fade-up delay-5">
+        <div class="metric-label">Engagement Rate</div>
+        <div class="metric-value">2.8%</div>
+        <div class="metric-change mc-up">↑ 0.7% vs last week</div>
+        <div class="metric-target">Target: 4.5% (platform avg: 3.85%)</div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill pf-gold" style="width:62%"></div></div>
+          <div class="progress-label"><span>0%</span><span>2.8%</span><span>4.5%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: CONTENT QUEUE ────────── -->
+  <div class="section-label" id="content">Today's content queue · SCOUT</div>
+  <div class="three-col fade-up delay-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">SCOUT Briefs — 29 April 2026</div>
+        <div class="card-badge cb-gold">Generated 08:02</div>
+      </div>
+      <div class="card-body">
+        <div class="brief-item">
+          <div class="brief-num">01</div>
+          <div class="brief-content">
+            <div class="brief-title">Most founders hit $50K/month and immediately hire. That's the mistake.</div>
+            <div class="brief-hook">"I hired 3 people before I had a single system. Cost me $40K and 6 months."</div>
+            <div class="brief-tags">
+              <span class="brief-tag bt-platform">LinkedIn Post</span>
+              <span class="brief-tag bt-pillar">Systems thinking</span>
+              <span class="brief-tag bt-status-pending">Pending ENGINE</span>
+            </div>
+          </div>
+          <div class="brief-score score-high">9</div>
+        </div>
+        <div class="brief-item">
+          <div class="brief-num">02</div>
+          <div class="brief-content">
+            <div class="brief-title">The pricing conversation nobody wants to have — but everyone needs to</div>
+            <div class="brief-hook">"Charging $2,000/month when your work generates $40,000 in value is a systems failure."</div>
+            <div class="brief-tags">
+              <span class="brief-tag bt-platform">Newsletter</span>
+              <span class="brief-tag bt-pillar">Pricing + positioning</span>
+              <span class="brief-tag bt-status-pending">Pending ENGINE</span>
+            </div>
+          </div>
+          <div class="brief-score score-high">8</div>
+        </div>
+        <div class="brief-item">
+          <div class="brief-num">03</div>
+          <div class="brief-content">
+            <div class="brief-title">I booked 7 discovery calls this month. I sent zero cold outreach.</div>
+            <div class="brief-hook">"ECHO handled all of it. Here's the exact signal it watches for."</div>
+            <div class="brief-tags">
+              <span class="brief-tag bt-platform">LinkedIn Article</span>
+              <span class="brief-tag bt-pillar">Client acquisition</span>
+              <span class="brief-tag bt-status-approved">ENGINE Approved</span>
+            </div>
+          </div>
+          <div class="brief-score score-high">9</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Research cost</div>
+          <div class="card-badge cb-green">Perplexity Pro</div>
+        </div>
+        <div class="card-body">
+          <div style="font-family:var(--serif);font-style:italic;font-size:28px;color:var(--ink);margin-bottom:4px">$0.00535</div>
+          <div style="font-family:var(--mono);font-size:11px;color:rgba(12,12,10,.4)">Per SCOUT cycle · 354 tokens</div>
+          <div style="font-family:var(--mono);font-size:10px;color:rgba(12,12,10,.25);margin-top:8px">Monthly estimate: ~$0.16</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Quality gate · IRIS</div>
+          <div class="card-badge cb-green">All passed</div>
+        </div>
+        <div class="card-body">
+          <div style="font-size:13px;color:rgba(12,12,10,.5);line-height:1.6">All 3 briefs scored ≥ 7. Voice match confirmed. CTA present. No policy violations detected.</div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--green2)">✓ Minimum threshold: 7/10</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: ROCKS ────────────────── -->
+  <div class="section-label" id="rocks">Quarterly rocks · Q2 2026 · Tracked by NERVE</div>
+  <div class="two-col fade-up delay-3">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Active rocks</div>
+        <div class="card-badge cb-gold">5 rocks · 63 days remaining</div>
+      </div>
+      <div class="card-body">
+        <div class="rock-item">
+          <div class="rock-header">
+            <div class="rock-name">LinkedIn: 8,400 → 14,000 followers</div>
+            <div class="rock-status rs-on">On track</div>
+          </div>
+          <div class="rock-meta">Owner: NEXUS + ECHO · Due: June 30</div>
+          <div class="progress-track"><div class="progress-fill pf-green" style="width:60%"></div></div>
+        </div>
+        <div class="rock-item">
+          <div class="rock-header">
+            <div class="rock-name">Newsletter: 1,240 → 2,500 subscribers</div>
+            <div class="rock-status rs-on">On track</div>
+          </div>
+          <div class="rock-meta">Owner: NEXUS · Due: June 30</div>
+          <div class="progress-track"><div class="progress-fill pf-blue" style="width:51%"></div></div>
+        </div>
+        <div class="rock-item">
+          <div class="rock-header">
+            <div class="rock-name">Close 3 new retainer clients (+$14,400 MRR)</div>
+            <div class="rock-status rs-progress">In progress</div>
+          </div>
+          <div class="rock-meta">Owner: ECHO + Alex · Due: June 30</div>
+          <div class="progress-track"><div class="progress-fill pf-gold" style="width:33%"></div></div>
+        </div>
+        <div class="rock-item">
+          <div class="rock-header">
+            <div class="rock-name">Publish 65 LinkedIn posts via SENTINEL</div>
+            <div class="rock-status rs-on">On track</div>
+          </div>
+          <div class="rock-meta">Owner: SCOUT + THREAD + NEXUS · Due: June 30</div>
+          <div class="progress-track"><div class="progress-fill pf-green" style="width:55%"></div></div>
+        </div>
+        <div class="rock-item">
+          <div class="rock-header">
+            <div class="rock-name">Launch Scalepath Group — 8 founding members</div>
+            <div class="rock-status rs-risk">At risk</div>
+          </div>
+          <div class="rock-meta">Owner: Alex · Due: May 31 · 32 days left</div>
+          <div class="progress-track"><div class="progress-fill pf-red" style="width:10%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Issues · IDS log</div>
+        <div class="card-badge cb-red">2 open</div>
+      </div>
+      <div class="card-body">
+        <div class="lock-alert">
+          <div class="lock-alert-icon">⚠</div>
+          <div class="lock-alert-body">
+            <div class="lock-alert-title">Rock 5 at risk — no waitlist built</div>
+            <div class="lock-alert-desc">Group programme due May 31. Zero waitlist signups. ECHO recommends DM campaign to top 20 engaged followers. Action required: Alex to approve ECHO outreach sequence.</div>
+          </div>
+        </div>
+        <div class="lock-alert">
+          <div class="lock-alert-icon">⚠</div>
+          <div class="lock-alert-body">
+            <div class="lock-alert-title">Engagement rate below platform average</div>
+            <div class="lock-alert-desc">Current 2.8% vs platform average 3.85%. IRIS has tightened hook quality threshold. THREAD is generating stronger opening lines. Monitor for 7 days.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: SCORECARD ────────────── -->
+  <div class="section-label" id="scorecard">EOS weekly scorecard · Updated by NERVE every Friday</div>
+  <div class="card fade-up delay-3" style="margin-bottom:1.5rem">
+    <div class="card-header">
+      <div class="card-title">Week of 28 April 2026</div>
+      <div class="card-badge cb-blue">NERVE · Last updated Friday 08:00</div>
+    </div>
+    <div class="card-body">
+      <div class="scorecard-row" style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(12,12,10,.3)">
+        <div>Metric</div><div style="text-align:right">Target</div><div style="text-align:right">This week</div><div style="text-align:center">Status</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">LinkedIn posts published</div>
+        <div class="sc-target">5/week</div>
+        <div class="sc-value" style="color:var(--green2)">5</div>
+        <div class="sc-status">🟢</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">Newsletter sent</div>
+        <div class="sc-target">1/week</div>
+        <div class="sc-value" style="color:var(--green2)">1</div>
+        <div class="sc-status">🟢</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">LinkedIn follower growth</div>
+        <div class="sc-target">+430/week</div>
+        <div class="sc-value" style="color:var(--green2)">+214</div>
+        <div class="sc-status">🟡</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">Newsletter subscriber growth</div>
+        <div class="sc-target">+97/week</div>
+        <div class="sc-value" style="color:var(--green2)">+44</div>
+        <div class="sc-status">🟡</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">Discovery calls booked (ECHO)</div>
+        <div class="sc-target">3–5/week</div>
+        <div class="sc-value" style="color:var(--green2)">3</div>
+        <div class="sc-status">🟢</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">Engagement rate</div>
+        <div class="sc-target">4.5%+</div>
+        <div class="sc-value" style="color:var(--amber)">2.8%</div>
+        <div class="sc-status">🔴</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">ECHO DM reply rate</div>
+        <div class="sc-target">20%+</div>
+        <div class="sc-value" style="color:var(--green2)">24%</div>
+        <div class="sc-status">🟢</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">Community active member rate</div>
+        <div class="sc-target">85%+</div>
+        <div class="sc-value" style="color:var(--green2)">88%</div>
+        <div class="sc-status">🟢</div>
+      </div>
+      <div class="scorecard-row">
+        <div class="sc-label">MRR</div>
+        <div class="sc-target">$65K Q2</div>
+        <div class="sc-value" style="color:var(--red2)">$47K</div>
+        <div class="sc-status">🔴</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: MEMORY ───────────────── -->
+  <div class="section-label" id="memory">Long-term memory · SENTINEL learns from every run</div>
+  <div class="card fade-up delay-4" style="margin-bottom:1.5rem">
+    <div class="card-header">
+      <div class="card-title">Approved briefs — training corpus</div>
+      <div class="card-badge cb-green">Memory active · 6 approved</div>
+    </div>
+    <div class="card-body">
+      <div style="font-size:12.5px;color:rgba(12,12,10,.4);margin-bottom:1rem;line-height:1.6">SCOUT reads these before every cycle. Approved briefs teach structure. Rejected ones are avoided. The system gets smarter every run.</div>
+      <div class="memory-row" style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:rgba(12,12,10,.3)">
+        <div>Brief title</div><div>Pillar</div><div>Score</div><div>Status</div>
+      </div>
+      <div class="memory-row">
+        <div class="mr-title">Most founders don't have a revenue problem — they have a capacity problem</div>
+        <div class="mr-pillar">Systems</div>
+        <div class="mr-score" style="color:var(--green2)">9/10</div>
+        <div class="mr-status" style="background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)">Published</div>
+      </div>
+      <div class="memory-row">
+        <div class="mr-title">You're probably undercharging — here's the system to fix it</div>
+        <div class="mr-pillar">Pricing</div>
+        <div class="mr-score" style="color:var(--green2)">8/10</div>
+        <div class="mr-status" style="background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)">Approved</div>
+      </div>
+      <div class="memory-row">
+        <div class="mr-title">3 clients, $14,400 MRR, 90 days — the acquisition system breakdown</div>
+        <div class="mr-pillar">Acquisition</div>
+        <div class="mr-score" style="color:var(--green2)">9/10</div>
+        <div class="mr-status" style="background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)">Published</div>
+      </div>
+      <div class="memory-row">
+        <div class="mr-title">Scale without burnout — the 32-hour work week at $47K/month</div>
+        <div class="mr-pillar">Burnout</div>
+        <div class="mr-score" style="color:var(--green2)">8/10</div>
+        <div class="mr-status" style="background:var(--green-bg);color:var(--green2);border:1px solid var(--green-border)">Approved</div>
+      </div>
+      <div class="memory-row">
+        <div class="mr-title">Generic AI advice for consultants — why it fails</div>
+        <div class="mr-pillar">Systems</div>
+        <div class="mr-score" style="color:var(--red2)">6/10</div>
+        <div class="mr-status" style="background:var(--red-bg);color:var(--red2);border:1px solid var(--red-border)">Rejected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: AGENT HEALTH ─────────── -->
+  <div class="section-label" id="agents">Agent health · SUSTAIN 24h audit</div>
+  <div class="two-col fade-up delay-4">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Agent status</div>
+        <div class="card-badge cb-green">7/8 live · 1 building</div>
+      </div>
+      <div class="card-body">
+        <div class="agent-health">
+          <div class="agent-row">
+            <div class="agent-letter al-gold">S</div>
+            <div class="agent-info">
+              <div class="agent-name">SCOUT — Intelligence</div>
+              <div class="agent-last">Last run: Today 08:02 · 3 briefs · $0.005</div>
+            </div>
+            <div class="agent-status-dot asd-live"></div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-letter al-red">L</div>
+            <div class="agent-info">
+              <div class="agent-name">LOCK — Security + Retention</div>
+              <div class="agent-last">Last check: Today 08:01 · Licence valid · 2 alerts</div>
+            </div>
+            <div class="agent-status-dot asd-live"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-blue">E</div>
+            <div class="agent-info">
+              <div class="agent-name">ENGINE — EOS Integrator</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-blue">N</div>
+            <div class="agent-info">
+              <div class="agent-name">NERVE — Analytics</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-gold">T</div>
+            <div class="agent-info">
+              <div class="agent-name">THREAD — Content Synthesis</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-green">I</div>
+            <div class="agent-info">
+              <div class="agent-name">IRIS — Quality Gate</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-green">N</div>
+            <div class="agent-info">
+              <div class="agent-name">NEXUS — Executor</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+          <div class="agent-row" style="opacity:.5">
+            <div class="agent-letter al-gold">E</div>
+            <div class="agent-info">
+              <div class="agent-name">ECHO — Revenue Conversion</div>
+              <div class="agent-last">Building — Phase 1</div>
+            </div>
+            <div class="agent-status-dot asd-build"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCK RETENTION -->
+    <div class="card" id="lock">
+      <div class="card-header">
+        <div class="card-title">LOCK · Retention alerts</div>
+        <div class="card-badge cb-red">2 members at risk</div>
+      </div>
+      <div class="card-body">
+        <div style="font-size:12.5px;color:rgba(12,12,10,.5);margin-bottom:1rem;line-height:1.6">LOCK monitors community engagement weekly. Members silent for 21+ days are flagged for re-engagement before they cancel.</div>
+        <div class="lock-alert">
+          <div class="lock-alert-icon">⚠</div>
+          <div class="lock-alert-body">
+            <div class="lock-alert-title">Sarah M. — 24 days inactive</div>
+            <div class="lock-alert-desc">Last login: April 5. Missed 3 group calls. LOCK has prepared a personalised re-engagement message. Awaiting Alex's approval to send.</div>
+          </div>
+        </div>
+        <div class="lock-alert">
+          <div class="lock-alert-icon">⚠</div>
+          <div class="lock-alert-body">
+            <div class="lock-alert-title">David K. — 22 days inactive</div>
+            <div class="lock-alert-desc">Last login: April 7. Signed up for premium tier. No posts submitted. LOCK flags high churn risk. Re-engagement sequence ready.</div>
+          </div>
+        </div>
+        <div class="lock-ok">
+          <span>✓</span>
+          <span>LOCK licence verified · Kill switch: active · System secured</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: ACTIVITY ──────────────── -->
+  <div class="section-label" id="activity">Audit log · Every agent action recorded</div>
+  <div class="card fade-up delay-5" style="margin-bottom:1.5rem">
+    <div class="card-header">
+      <div class="card-title">Recent actions</div>
+      <div class="card-badge cb-blue">Supabase · sentinel_audit_log</div>
+    </div>
+    <div class="card-body">
+      <div class="activity-item">
+        <div class="activity-icon ai-gold">🔍</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>SCOUT</strong> — Generated 3 content briefs from live LinkedIn trend data. Scores: 9, 8, 9. All above quality threshold.</div>
+          <div class="activity-time">Today · 08:02 · Cost: $0.005</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon ai-red">🔒</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>LOCK</strong> — Licence verified for client demo-alex-001. is_active: true. System authorised to proceed.</div>
+          <div class="activity-time">Today · 08:01 · Supabase confirmed</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon ai-red">⚠</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>LOCK</strong> — Retention alert: Sarah M. (24 days inactive). Re-engagement message prepared. Awaiting human approval.</div>
+          <div class="activity-time">Today · 06:00 · Action required</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon ai-green">📊</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>MEMORY</strong> — Brief "Scale without burnout at $47K/month" marked Approved. Added to SCOUT training corpus. Memory count: 6.</div>
+          <div class="activity-time">Yesterday · 16:30 · Human approved</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon ai-gold">🔍</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>SCOUT</strong> — Generated 3 content briefs. Scores: 8, 7, 9. All above quality threshold. Written to Notion Content Queue.</div>
+          <div class="activity-time">Yesterday · 08:01 · Cost: $0.005</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon ai-blue">📩</div>
+        <div class="activity-body">
+          <div class="activity-text"><strong>SCOUT</strong> — Slack notification fired to #sentinel-demo. 3 briefs delivered to Alex. ENGINE review window: 4 hours.</div>
+          <div class="activity-time">Yesterday · 08:02 · #sentinel-demo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dashboard-footer">
+    <div>SENTINEL v1.0 · Phase 0 · Built on EOS · Powered by Claude</div>
+    <div>Alex Chen · Scalepath Advisory · Q2 2026</div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// Live clock
+function updateTime() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-AU', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    timeZone: 'Asia/Makassar' // Bali timezone
+  });
+  const el = document.getElementById('navTime');
+  if (el) el.textContent = 'Bali · ' + t;
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('[id]');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
